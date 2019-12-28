@@ -1,8 +1,12 @@
 from __future__ import generators, division, absolute_import, with_statement, print_function, unicode_literals
 
+import os
+import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.datasets import mnist
+from dataset_chemical import load_dataset
+
 
 class Dataset(object):
 	images_train = np.array([])
@@ -13,8 +17,10 @@ class Dataset(object):
 	map_train_label_indices = dict()
 
 	def _get_siamese_similar_pair(self):
-		label =np.random.choice(self.unique_train_label)
-		l, r = np.random.choice(self.map_train_label_indices[label], 2, replace=False)
+		label = np.random.choice(self.unique_train_label)
+		if(self.map_train_label_indices[label].shape[0]<2):
+		 print('errirroro'+label)
+		l, r = 	np.random.choice(self.map_train_label_indices[label], 2, replace=False)
 		return l, r, 1
 
 	def _get_siamese_dissimilar_pair(self):
@@ -53,10 +59,26 @@ class MNISTDataset(Dataset):
 		print("Labels test  :", self.labels_test.shape)
 		print("Unique label :", self.unique_train_label)
 		# print("Map label indices:", self.map_train_label_indices)
+
+class ChemicalDataset(Dataset):
+	def __init__(self):
+		print("===Loading Chemical Dataset===")
+		(self.images_train, self.labels_train), (self.images_test, self.labels_test) = load_dataset()
+		self.images_train = np.expand_dims(self.images_train, axis=3) / 255.0
+		self.images_test = np.expand_dims(self.images_test, axis=3) / 255.0
+		self.labels_train = np.expand_dims(self.labels_train, axis=1)
+		self.unique_train_label = np.unique(self.labels_train)
+		self.map_train_label_indices = {label: np.flatnonzero(self.labels_train == label) for label in self.unique_train_label}
+		print("Images train :", self.images_train.shape)
+		print("Labels train :", self.labels_train.shape)
+		print("Images test  :", self.images_test.shape)
+		print("Labels test  :", self.labels_test.shape)
+		#print("Unique label :", self.unique_train_label)
+		# print("Map label indices:", self.map_train_label_indices)
 		
 if __name__ == "__main__":
 	# Test if it can load the dataset properly or not. use the train.py to run the training
-	a = MNISTDataset()
+	a = ChemicalDataset()
 	batch_size = 4
 	ls, rs, xs = a.get_siamese_batch(batch_size)
 	f, axarr = plt.subplots(batch_size, 2)
