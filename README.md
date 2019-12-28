@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Siamese Network Tensorflow
 
 Siamese network is a neural network that contain two or more identical subnetwork. The objective of this network is to find the similarity or comparing the relationship between two comparable things. Unlike classification task that uses cross entropy as the loss function, siamese network usually uses contrastive loss or triplet loss.
@@ -56,3 +57,6 @@ Image retrieval uses the trained model to extract the features and get the most 
 - Retrieved top n similar image from train data
 with ids of [53144 47864 11074 51561 41350 34215 48182] from train data
 ![](https://github.com/ardiya/siamesenetwork-tensorflow/raw/master/figure/retrieve-from-train.png)
+=======
+# image_retrieve
+>>>>>>> 3fff2b39de09b5c0d72566d5b073c8ca41f70a35
