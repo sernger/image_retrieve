@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 
-from dataset import MNISTDataset, Cifar10Dataset
+from dataset import MNISTDataset, ChemicalDataset
 #from model import *
 
 flags = tf.app.flags
@@ -28,7 +28,9 @@ def contrastive_loss(model1, model2, y, margin):
 		dissimilarity = (1 - y) * tf.square(tf.maximum((margin - distance), 0))        # give penalty to dissimilar label if the distance is bigger than margin
 		return tf.reduce_mean(dissimilarity + similarity) / 2
 
-
+def next_generator():
+    for 
+        yield  dataset.get_siamese_batch()
 if __name__ == "__main__":
     dataset = Cifar10Dataset()
     
@@ -44,16 +46,14 @@ if __name__ == "__main__":
 
 
  
+    label = tf.placeholder(tf.int32, [None, 1], name='label') # 1 if same, 0 if different
+    label_float = tf.to_float(label)
 
-    with tf.name_scope("similarity"):
-        label = tf.placeholder(tf.int32, [None, 1], name='label') # 1 if same, 0 if different
-        label_float = tf.to_float(label)
-    
-    siamese_model = tf.keras.Model(inputs=[left, right])
-    #left_model = tf.keras.Model(inputs=left, outputs=left_out)
-    #right_model = tf.keras.Model(input=right, outputs=right_out)
+    siamese_model = tf.keras.Model(inputs=[left, right, label], outputs=[left_out, right_out, label_float])
     
     margin = 0.5
     loss = contrastive_loss(left_out, right_out, label_float, margin)
 
-    left_model.compile(optimizer='Adam', loss=loss)
+    siamese_model.compile(optimizer='Adam', loss=loss)
+
+    siamese_model.fit_generator(next_generator, epochs=200)

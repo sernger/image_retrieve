@@ -41,7 +41,7 @@ def read_path(path_name):
     count = 0
     for dir_item in tqdm(os.listdir(path_name), desc='dirs'): # os.listdir() 方法用于返回指定的文件夹包含的文件或文件夹的名字的列表
         count += 1
-        if count > 3000:
+        if count > 100:
             break
         # 从当前工作目录寻找训练集图片的文件夹
         full_path = os.path.abspath(os.path.join(path_name, dir_item))
@@ -66,12 +66,44 @@ def load_dataset():
     images,labels = read_path("image-all")
     
     X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0.1, random_state=42)
-    X_train, y_train = data_aug(X_train, y_train)
-    X_test, y_test = data_aug(X_test, y_test)
+  #  X_train, y_train = data_aug_rotate(X_train, y_train)
+ #   X_test, y_test = data_aug_rotate(X_test, y_test)
     print(X_train.shape) 
     return (X_train, y_train), (X_test, y_test)
 
-def data_aug(images, labels):
+def gasuss_noise(image, mean=0, var=0.001):
+        ''' 
+            添加高斯噪声
+            mean : 均值 
+            var : 方差
+        ''' 
+        noise = np.random.normal(mean, var ** 0.5, image.shape)
+        out = image + noise
+        out = np.clip(out, 0, 1.0)
+        #cv.imshow("gasuss", out)
+        return out
+
+def rotate(image, center=None, scale=1.0):
+    (h, w) = image.shape[:2]
+    angle = np.random.randint(360)
+    # 若未指定旋转中心，则将图像中心设为旋转中心
+    if center is None:
+        center = (w / 2, h / 2)
+
+    # 执行旋转
+    M = cv2.getRotationMatrix2D(center, angle, scale)
+    rotated = cv2.warpAffine(image, M, (w, h), borderValue=(1.0,1.0,1.0))
+
+    # 返回旋转后的图像
+    return rotated
+
+def image_random(image):
+
+    image = gasuss_noise(image)
+    image = rotate(image)
+    return image
+
+def data_aug_rotate(images, labels):
     aug_img=[]
     aug_lab=[]
     for i in tqdm(range(images.shape[0])):
@@ -89,9 +121,9 @@ def data_aug(images, labels):
 if __name__ == "__main__":
     (X_train, y_train), (X_test, y_test) = load_dataset()
     im = X_train[2,:,:]/255
-    im0 = cv2.rotate(im, 0)
-    im1 = cv2.rotate(im, 1)
-    im2 = cv2.rotate(im, 2)
+    im0 = image_random(im)
+    im1 = image_random(im)
+    im2 = image_random(im)
     hmerge = np.hstack((im, im0, im1, im2))
     cv2.imshow("1", hmerge)
 

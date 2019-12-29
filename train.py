@@ -10,7 +10,7 @@ from model import *
 flags = tf.app.flags
 FLAGS = flags.FLAGS
 flags.DEFINE_integer('batch_size', 128, 'Batch size.')
-flags.DEFINE_integer('train_iter', 2000, 'Total training iter')
+flags.DEFINE_integer('train_iter', 20000, 'Total training iter')
 flags.DEFINE_integer('step', 50, 'Save after ... iteration')
 flags.DEFINE_string('model', 'chemical', 'model to run')
 
