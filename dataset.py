@@ -65,20 +65,26 @@ class ChemicalDataset(Dataset):
 		print("===Loading Chemical Dataset===")
 		(self.images_train, self.labels_train), (self.images_test, self.labels_test) = load_dataset()
 		self.images_train = np.expand_dims(self.images_train, axis=3) / 255.0
-		self.images_test = np.expand_dims(self.images_test, axis=3) / 255.0
+#		self.images_test = np.expand_dims(self.images_test, axis=3) / 255.0
 		self.labels_train = np.expand_dims(self.labels_train, axis=1)
 		self.unique_train_label = np.unique(self.labels_train)
 		self.map_train_label_indices = {label: np.flatnonzero(self.labels_train == label) for label in self.unique_train_label}
 		print("Images train :", self.images_train.shape)
 		print("Labels train :", self.labels_train.shape)
-		print("Images test  :", self.images_test.shape)
-		print("Labels test  :", self.labels_test.shape)
-		self.i = 0
+#		print("Images test  :", self.images_test.shape)
+#		print("Labels test  :", self.labels_test.shape)
+		self.similarIndex = 0
+		self.dissimilarIndex = 0
 		#print("Unique label :", self.unique_train_label)
 		# print("Map label indices:", self.map_train_label_indices)
 
+	def getLen(self):
+		return self.images_train.shape[0]
+
 	def _get_siamese_similar_pair(self):
-		label = np.random.choice(self.unique_train_label)
+		#label = np.random.choice(self.unique_train_label)
+		label = self.unique_train_label[self.dissimilarIndex%self.unique_train_label.shape[0]]
+		self.similarIndex += 1
 		l = np.random.choice(self.map_train_label_indices[label])
 		r = np.random.choice(self.map_train_label_indices[label])
 		l = image_random(self.images_train[l])
@@ -86,7 +92,10 @@ class ChemicalDataset(Dataset):
 		return l, r, 1
 
 	def _get_siamese_dissimilar_pair(self):
-		label_l, label_r = np.random.choice(self.unique_train_label, 2, replace=False)
+		label_l = self.unique_train_label[self.dissimilarIndex%self.unique_train_label.shape[0]]
+		self.dissimilarIndex += 1
+	#	label_r = np.random.choice(self.unique_train_label[np.where(self.unique_train_label!=label_l)], 1, replace=False)
+		label_r = np.random.choice(self.unique_train_label[np.where(self.unique_train_label!=label_l)])
 		l = np.random.choice(self.map_train_label_indices[label_l])
 		r = np.random.choice(self.map_train_label_indices[label_r])
 
@@ -103,7 +112,6 @@ class ChemicalDataset(Dataset):
 	def get_siamese_batch(self, n):
 		left, right, labels = [], [], []
 		for _ in range(n):
-			self.i += 1
 			l, r, x = self._get_siamese_pair()
 			left.append(l)
 			right.append(r)

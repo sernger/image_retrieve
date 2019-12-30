@@ -64,12 +64,13 @@ def read_path(path_name):
 # 读取训练数据并完成标注
 def load_dataset():
     images,labels = read_path("image-all")
-    
-    X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0.1, random_state=42)
+   
+   # X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0, random_state=42)
   #  X_train, y_train = data_aug_rotate(X_train, y_train)
  #   X_test, y_test = data_aug_rotate(X_test, y_test)
-    print(X_train.shape) 
-    return (X_train, y_train), (X_test, y_test)
+ #   print(X_train.shape) 
+ #   return (X_train, y_train), (X_test, y_test)
+    return (images, labels), (None, None)
 
 def gasuss_noise(image, mean=0, var=0.001):
         ''' 
