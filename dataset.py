@@ -76,7 +76,7 @@ class ChemicalDataset(Dataset):
 		self.similarIndex = 0
 		self.dissimilarIndex = 0
 		#print("Unique label :", self.unique_train_label)
-		# print("Map label indices:", self.map_train_label_indices)
+		#print("Map label indices:", self.map_train_label_indices)
 
 	def getLen(self):
 		return self.images_train.shape[0]
