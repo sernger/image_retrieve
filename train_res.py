@@ -38,7 +38,7 @@ def next_generator():
     data = ChemicalDataset()
     batch_size = 32
     while True:
-        yield ((data.get_siamese_batch(batch_size)), None)
+        yield (data.get_siamese_batch(batch_size), None)
 
 if __name__ == "__main__":
 
@@ -71,4 +71,5 @@ if __name__ == "__main__":
     model.add_loss(loss_layer)
     siamese_model.compile(optimizer='Adam', loss=[None,None,None])
 
-    siamese_model.fit_generator(next_generator, steps_per_epoch=10, epochs=200)
+    data_gen = next_generator()
+    siamese_model.fit_generator(data_gen, steps_per_epoch=10, epochs=200)

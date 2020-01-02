@@ -116,7 +116,7 @@ class ChemicalDataset(Dataset):
 			left.append(l)
 			right.append(r)
 			labels.append(x)
-		return np.expand_dims(left, axis=3), np.expand_dims(right, axis=3), np.expand_dims(labels, axis=1)
+		return [np.expand_dims(left, axis=3), np.expand_dims(right, axis=3), np.expand_dims(labels, axis=1)]
 		
 if __name__ == "__main__":
 	# Test if it can load the dataset properly or not. use the train.py to run the training
