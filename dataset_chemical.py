@@ -37,17 +37,17 @@ def resize_image(image, height=IMAGE_SIZE, width=IMAGE_SIZE):
     return cv2.resize(constant, (height, width))
 
 # path_name是当前工作目录，后面会由os.getcwd()获得
-def read_path(path_name):
+def read_path(path_name , n=0):
     count = 0
     for dir_item in tqdm(os.listdir(path_name), desc='dirs'): # os.listdir() 方法用于返回指定的文件夹包含的文件或文件夹的名字的列表
         count += 1
-        if count > 100:
+        if n != 0 and count > n:
             break
         # 从当前工作目录寻找训练集图片的文件夹
         full_path = os.path.abspath(os.path.join(path_name, dir_item))
         
         if os.path.isdir(full_path): # 如果是文件夹，继续递归调用，去读取文件夹里的内容
-            read_path(full_path)
+            read_path(full_path, n)
         else: # 如果是文件了
             if dir_item.endswith('.png'):
                 image = cv2.imread(full_path, 0)
@@ -58,12 +58,11 @@ def read_path(path_name):
                     image = resize_image(image, IMAGE_SIZE, IMAGE_SIZE)
                     images.append(image)
                     labels.append(dir_item[:-4])
-                    
-
     return np.array(images, dtype='float'), np.array(labels)
+
 # 读取训练数据并完成标注
-def load_dataset():
-    images,labels = read_path("image-all")
+def load_dataset(n):
+    images,labels = read_path("image-all//", n)
    
    # X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0, random_state=42)
   #  X_train, y_train = data_aug_rotate(X_train, y_train)
@@ -86,7 +85,7 @@ def gasuss_noise(image, mean=0, var=0.001):
 
 def rotate(image, center=None, scale=1.0):
     (h, w) = image.shape[:2]
-    angle = np.random.randint(360)
+    angle = np.random.randint(0,20) - 10
     # 若未指定旋转中心，则将图像中心设为旋转中心
     if center is None:
         center = (w / 2, h / 2)
@@ -120,7 +119,7 @@ def data_aug_rotate(images, labels):
 
 
 if __name__ == "__main__":
-    (X_train, y_train), (X_test, y_test) = load_dataset()
+    (X_train, y_train), (X_test, y_test) = load_dataset(100)
     im = X_train[2,:,:]/255
     im0 = image_random(im)
     im1 = image_random(im)

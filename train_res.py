@@ -7,6 +7,7 @@ import keras
 import keras.backend as K
 from keras.utils import plot_model
 from keras.models import Model
+from keras.callbacks import ModelCheckpoint
 
 
 
@@ -17,10 +18,12 @@ from functools import partial
 #os.environ["CUDA_VISIBLE_DEVICES"] = ""
 flags = tf.app.flags
 FLAGS = flags.FLAGS
-flags.DEFINE_integer('batch_size', 512, 'Batch size.')
+flags.DEFINE_integer('batch_size', 32, 'Batch size.')
+flags.DEFINE_integer('train_data_size', 3200, 'train data size.')
+flags.DEFINE_integer('val_data_size', 320, 'val data size.')
 flags.DEFINE_integer('train_iter', 2000, 'Total training iter')
-flags.DEFINE_integer('step', 50, 'Save after ... iteration')
-flags.DEFINE_string('model', 'mnist', 'model to run')
+#flags.DEFINE_integer('step', 50, 'Save after ... iteration')
+#flags.DEFINE_string('model', 'mnist', 'model to run')
 
 K.set_image_data_format('channels_last')
 def ResNet50_model(input_shape):
@@ -36,16 +39,14 @@ def contrastive_loss(l, r, y):
     return K.mean(dissimilarity + similarity) / 2
 
 def next_generator():
-    data = ChemicalDataset()
-    batch_size = 32
+    data = ChemicalDataset(FLAGS.train_data_size)
     while True:
-        yield (data.get_siamese_batch(batch_size), None)
+        yield (data.get_siamese_batch(FLAGS.batch_size), None)
 
 if __name__ == "__main__":
 
     input_shape = [160,160,1]
     print("input_shape:", input_shape)
-    colors = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff', '#990000', '#999900', '#009900', '#009999']
 
     left = keras.Input(shape=input_shape, name='left')
     right = keras.Input(shape=input_shape, name='right')
@@ -70,5 +71,33 @@ if __name__ == "__main__":
 
     print(siamese_model.summary())
 
+    save_dir = os.path.join(os.getcwd(), 'saved_models')
+    model_name = 'resnet50_model_weight.{epoch:03d}.h5'
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
+    filepath = os.path.join(save_dir, model_name)
+    #model.load_weights('my_model_weights.h5')
+    #save best weight 
+    checkpoint = ModelCheckpoint(filepath=filepath,
+                                monitor='loss',
+                                verbose=1,
+                                save_best_only=True,
+                                period=100,
+                                save_weights_only=True)
+                    
+    callbacks = [checkpoint]
+
     data_gen = next_generator()
-    siamese_model.fit_generator(data_gen, steps_per_epoch=10, epochs=200)
+
+    #val_data = ChemicalDataset(FLAGS.val_data_size)
+    #val_data = (val_data.get_siamese_batch(FLAGS.batch_size), )
+    siamese_model.fit_generator(data_gen, 
+                                steps_per_epoch=FLAGS.train_data_size/FLAGS.batch_size, 
+                                epochs=FLAGS.train_iter, 
+                                verbose=1, 
+                                #workers=4, 
+                              #  validation_data = val_data,
+                              # use_multiprocessing=True,
+                                callbacks=callbacks)
+
+    siamese_model.save(os.path.join(save_dir, "resnet50_model.h5"))

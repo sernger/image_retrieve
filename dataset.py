@@ -61,9 +61,9 @@ class MNISTDataset(Dataset):
 		# print("Map label indices:", self.map_train_label_indices)
 
 class ChemicalDataset(Dataset):
-	def __init__(self):
+	def __init__(self, n=0):
 		print("===Loading Chemical Dataset===")
-		(self.images_train, self.labels_train), (self.images_test, self.labels_test) = load_dataset()
+		(self.images_train, self.labels_train), (self.images_test, self.labels_test) = load_dataset(n)
 		self.images_train = np.expand_dims(self.images_train, axis=3) / 255.0
 #		self.images_test = np.expand_dims(self.images_test, axis=3) / 255.0
 		self.labels_train = np.expand_dims(self.labels_train, axis=1)
