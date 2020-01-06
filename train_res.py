@@ -19,9 +19,9 @@ from functools import partial
 flags = tf.app.flags
 FLAGS = flags.FLAGS
 flags.DEFINE_integer('batch_size', 32, 'Batch size.')
-flags.DEFINE_integer('train_data_size', 3200, 'train data size.')
-flags.DEFINE_integer('val_data_size', 320, 'val data size.')
-flags.DEFINE_integer('train_iter', 2000, 'Total training iter')
+flags.DEFINE_integer('train_data_size', 32000, 'train data size.')
+#flags.DEFINE_integer('val_data_size', 320, 'val data size.')
+flags.DEFINE_integer('train_iter', 500, 'Total training iter')
 #flags.DEFINE_integer('step', 50, 'Save after ... iteration')
 #flags.DEFINE_string('model', 'mnist', 'model to run')
 
@@ -62,17 +62,19 @@ if __name__ == "__main__":
 
     siamese_model = keras.Model(inputs=[left, right, label], outputs=[left_out, right_out, loss])
 
-    loss_layer = siamese_model.get_layer("loss").output
-    model.add_loss(loss_layer)
+    loss_output= siamese_model.get_layer("loss").output
+    model.add_loss(loss_output)
     siamese_model.compile(optimizer='Adam', loss=[None,None,None])
 
     #plot_model(siamese_model, to_file="siamese_model_expand.png", show_shapes=True, expand_nested=True)
-    plot_model(siamese_model, to_file="siamese_model_expand.png", show_shapes=True)
+    #plot_model(siamese_model, to_file="siamese_model_expand.png", show_shapes=True)
 
     print(siamese_model.summary())
 
+    siamese_model.load_weights('saved_models\\resnet50_model_weight.300.h5')
+    
     save_dir = os.path.join(os.getcwd(), 'saved_models')
-    model_name = 'resnet50_model_weight.{epoch:03d}.h5'
+    model_name = '1_4_resnet50_model_weight.{epoch:03d}.h5'
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
     filepath = os.path.join(save_dir, model_name)
@@ -81,9 +83,9 @@ if __name__ == "__main__":
     checkpoint = ModelCheckpoint(filepath=filepath,
                                 monitor='loss',
                                 verbose=1,
-                                save_best_only=True,
-                                period=100,
-                                save_weights_only=True)
+                                period=10,
+                                save_weights_only=True,
+                                save_best_only=True)
                     
     callbacks = [checkpoint]
 

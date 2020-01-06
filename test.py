@@ -17,7 +17,8 @@ from matplotlib.pyplot import imshow
 from train_res import ResNet50_model
 from train_res import contrastive_loss
 from dataset_chemical import *
-
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 def img_to_encoding(image_path, model):
     image = cv2.imread(image_path, 0)
     img = image[..., ::-1]
@@ -84,16 +85,16 @@ if __name__ == "__main__":
     label = keras.Input(shape=(1,), name='label')
     loss = keras.layers.Lambda(lambda x: contrastive_loss(*x), name="loss")([left_out, right_out, label])
     siamese_model = keras.Model(inputs=[left, right, label], outputs=[left_out, right_out, loss])
-    siamese_model.load_weights("model//resnet50_model_weight.100.h5")
+    siamese_model.load_weights("saved_models//1_4_resnet50_model_weight.260.h5")
 
 
-    database = img_to_encoding_from_dir("E:/image-all", model, n=10)
+    database = img_to_encoding_from_dir("image-all/", model, n=10)
     # database["1"] = img_to_encoding("E:/image-all/1.png", model)
     # database["2"] = img_to_encoding("E:/image-all/2.png", model)
     # database["3"] = img_to_encoding("E:/image-all/3.png", model)
 
-
-    who_is_it("images/1.png", database, model)
+    who_is_it("image-test/10.png", database, model)
+    '''
     who_is_it("image-test/1-0.png", database, model)
     who_is_it("image-test/1-1.png", database, model)
     who_is_it("image-test/1-2.png", database, model)
@@ -114,7 +115,7 @@ if __name__ == "__main__":
     who_is_it("image-test/1-17.png", database, model)
     who_is_it("image-test/1-18.png", database, model)
     who_is_it("image-test/1-19.png", database, model)
-    a = 0;
+    '''
 
 
 
