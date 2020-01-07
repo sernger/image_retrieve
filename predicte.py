@@ -29,12 +29,21 @@ def img_to_encoding(image_path, model):
     return embedding
 
 
-def who_is_it(image_path, database, model):
-    encoding = img_to_encoding(image_path, model)
+# 减小特征值数量，每4个取平均值,数量2048->512
+def img_to_encoding_2(image_path, model):
+    embedding = img_to_encoding(image_path, model)
+    temp1 = embedding.reshape(-1,4)
+    temp2 = np.mean(temp1, axis=1)
+    #temp3 = np.array([temp2])
+    return temp2
+
+
+
+def who_is_it(encoding, database):
+
     margin = 0.5
     # distance = K.sqrt(K.sum(K.pow(l - r, 2), 1, keepdims=True))
     # similarity = y * K.square(distance)
-
 
     min_dist = 100
     for (name, db_enc) in database.items():
@@ -74,8 +83,7 @@ def img_to_encoding_from_dir(path_name, model, n=0):
 
     return database;
 
-
-if __name__ == "__main__":
+def ModelAndWeight():
     input_shape = [160, 160, 1]
     left = keras.Input(shape=input_shape, name='left')
     right = keras.Input(shape=input_shape, name='right')
@@ -86,14 +94,24 @@ if __name__ == "__main__":
     loss = keras.layers.Lambda(lambda x: contrastive_loss(*x), name="loss")([left_out, right_out, label])
     siamese_model = keras.Model(inputs=[left, right, label], outputs=[left_out, right_out, loss])
     siamese_model.load_weights("saved_models//1_4_resnet50_model_weight.260.h5")
+    return model
 
 
-    database = img_to_encoding_from_dir("image-all/", model, n=10)
-    # database["1"] = img_to_encoding("E:/image-all/1.png", model)
-    # database["2"] = img_to_encoding("E:/image-all/2.png", model)
-    # database["3"] = img_to_encoding("E:/image-all/3.png", model)
 
-    who_is_it("image-test/10.png", database, model)
+if __name__ == "__main__":
+    print("================predicte.py start ==================")
+    model = ModelAndWeight()
+    print("================predicte.py load_weights end ==================")
+
+    #database = img_to_encoding_from_dir("E:/image-all/", model, n=10)
+    database = {}
+    database["1"] = img_to_encoding("E:/image-all/1.png", model)
+    database["2"] = img_to_encoding("E:/image-all/2.png", model)
+    database["3"] = img_to_encoding("E:/image-all/3.png", model)
+
+
+    encoding = img_to_encoding("image-test/1-0.png", model)
+    who_is_it(encoding, database)
     '''
     who_is_it("image-test/1-0.png", database, model)
     who_is_it("image-test/1-1.png", database, model)
