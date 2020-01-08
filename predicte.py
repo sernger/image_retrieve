@@ -17,11 +17,14 @@ from matplotlib.pyplot import imshow
 from train_res import ResNet50_model
 from train_res import contrastive_loss
 from dataset_chemical import *
+import tool
+import db
+
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 def img_to_encoding(image_path, model):
-    image = cv2.imread(image_path, 0)
-    img = image[..., ::-1]
+    img = cv2.imread(image_path, 0)
+    img = img[..., ::-1]
     img = resize_image(img, IMAGE_SIZE, IMAGE_SIZE)
     images_train = np.expand_dims(img, axis=3) / 255.0
     x_train = np.array([images_train])
@@ -32,19 +35,16 @@ def img_to_encoding(image_path, model):
 # 减小特征值数量，每4个取平均值,数量2048->512
 def img_to_encoding_2(image_path, model):
     embedding = img_to_encoding(image_path, model)
-    temp1 = embedding.reshape(-1,4)
+    temp1 = embedding.reshape(-1, 4)
     temp2 = np.mean(temp1, axis=1)
-    #temp3 = np.array([temp2])
+    # temp3 = np.array([temp2])
     return temp2
 
 
-
 def who_is_it(encoding, database):
-
     margin = 0.5
     # distance = K.sqrt(K.sum(K.pow(l - r, 2), 1, keepdims=True))
     # similarity = y * K.square(distance)
-
     min_dist = 100
     for (name, db_enc) in database.items():
         dist = np.linalg.norm(encoding - db_enc)
@@ -58,10 +58,6 @@ def who_is_it(encoding, database):
         print("it's " + str(identity) + ".png, the distance is " + str(min_dist))
 
     return min_dist, identity
-
-    # margin = 0.5
-    # distance = K.sqrt(K.sum(K.pow(l - r, 2), 1, keepdims=True))
-    # similarity = y * K.square(distance)
 
 
 def img_to_encoding_from_dir(path_name, model, n=0):
@@ -84,16 +80,19 @@ def img_to_encoding_from_dir(path_name, model, n=0):
     return database;
 
 def ModelAndWeight():
+    print(tool.Time() + "ModelAndWeight load begin")
     input_shape = [160, 160, 1]
     left = keras.Input(shape=input_shape, name='left')
     right = keras.Input(shape=input_shape, name='right')
     model = ResNet50_model(input_shape)
+    #print(tool.Time() + "ModelAndWeight load ResNet50_model end")
     left_out = model(left)
     right_out = model(right)
     label = keras.Input(shape=(1,), name='label')
     loss = keras.layers.Lambda(lambda x: contrastive_loss(*x), name="loss")([left_out, right_out, label])
     siamese_model = keras.Model(inputs=[left, right, label], outputs=[left_out, right_out, loss])
     siamese_model.load_weights("saved_models//1_4_resnet50_model_weight.260.h5")
+    print(tool.Time() + "ModelAndWeight load end")
     return model
 
 
@@ -103,37 +102,22 @@ if __name__ == "__main__":
     model = ModelAndWeight()
     print("================predicte.py load_weights end ==================")
 
-    #database = img_to_encoding_from_dir("E:/image-all/", model, n=10)
-    database = {}
-    database["1"] = img_to_encoding("E:/image-all/1.png", model)
-    database["2"] = img_to_encoding("E:/image-all/2.png", model)
-    database["3"] = img_to_encoding("E:/image-all/3.png", model)
 
+    # database = {}
+    # database["6"] = img_to_encoding_2("E:/image-new/6.png", model)
+    # database["7"] = img_to_encoding_2("E:/image-new/7.png", model)
+    # database["11"] = img_to_encoding_2("E:/image-new/11.png", model)
+    #
+    # encoding = img_to_encoding_2("image-test/11.png", model)
+    # who_is_it(encoding, database)
+    # encoding = img_to_encoding_2("image-test/11-1.png", model)
+    # who_is_it(encoding, database)
+    # print("")
 
-    encoding = img_to_encoding("image-test/1-0.png", model)
-    who_is_it(encoding, database)
-    '''
-    who_is_it("image-test/1-0.png", database, model)
-    who_is_it("image-test/1-1.png", database, model)
-    who_is_it("image-test/1-2.png", database, model)
-    who_is_it("image-test/1-3.png", database, model)
-    who_is_it("image-test/1-4.png", database, model)
-    who_is_it("image-test/1-5.png", database, model)
-    who_is_it("image-test/1-6.png", database, model)
-    who_is_it("image-test/1-7.png", database, model)
-    who_is_it("image-test/1-8.png", database, model)
-    who_is_it("image-test/1-9.png", database, model)
-    who_is_it("image-test/1-10.png", database, model)
-    who_is_it("image-test/1-11.png", database, model)
-    who_is_it("image-test/1-12.png", database, model)
-    who_is_it("image-test/1-13.png", database, model)
-    who_is_it("image-test/1-14.png", database, model)
-    who_is_it("image-test/1-15.png", database, model)
-    who_is_it("image-test/1-16.png", database, model)
-    who_is_it("image-test/1-17.png", database, model)
-    who_is_it("image-test/1-18.png", database, model)
-    who_is_it("image-test/1-19.png", database, model)
-    '''
+    encoding = img_to_encoding_2("image-test/11.png", model)
+    db.who_is_it(encoding)
+    print("")
+
 
 
 
