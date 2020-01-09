@@ -29,6 +29,7 @@ TABLE_EXACT_READ = "compound"
 DATABASE_USER_READ= "root"
 DATABASE_PWD_READ = "123456"
 
+IMAGE_PATH = "E:/image-all/"
 
 
 """
@@ -72,8 +73,8 @@ def saveData(startId, endId=0):
             startId = compound["_id"]
             if("structImage" in compound and compound["structImage"].startswith("http://saasimg.molbase.net")):
                 #print(compound)
-                filePath = "E:/image-new/" + str(compound["_id"])+".png"
-                #downloadImage(compound["structImage"], ""E:/image-new/"", str(compound["id"])+".png")
+                filePath = IMAGE_PATH + str(compound["_id"])+".png"
+                #downloadImage(compound["structImage"], IMAGE_PATH, str(compound["id"])+".png")
                 if Path(filePath).exists():
                     encoding = predicte.img_to_encoding_2(filePath, model)
                     #if(encoding != None):
@@ -167,8 +168,8 @@ def downloadImageStart(startId, n=30000):
                 startId = compound["_id"]
                 if(compound["structImage"].startswith("http://saasimg.molbase.net")):
                     #print(compound)
-                    saveFilePath = "E:/image-new/" + str(compound["_id"])+".png"
-                    result = downloadImage(compound["structImage"], "E:/image-new/", str(compound["_id"])+".png")
+                    saveFilePath = IMAGE_PATH + str(compound["_id"])+".png"
+                    result = downloadImage(compound["structImage"], IMAGE_PATH, str(compound["_id"])+".png")
                     a = result[0]
                     if(result[0] == saveFilePath):
                         total = total+1
@@ -188,19 +189,20 @@ def who_is_it(encoding):
 
     for f_index in range(f_count):
         # distance = K.sqrt(K.sum(K.pow(l - r, 2), 1, keepdims=True))
-        l_f = ''.join(["(", str(encoding[f_index]), "-", "a.f", str(f_index+1), ")"])
-        l_f2 = '*'.join([l_f, l_f])
+        l_f = ''.join(["POWER(", str(encoding[f_index]), "-", "a.f", str(f_index+1), ",2)"])
+        #l_f2 = '*'.join([l_f, l_f])
         if(f_index==511):
             print("")
         if (f_index == f_count - 1):
-            distance = ''.join([distance, l_f2])
+            distance = ''.join([distance, l_f])
         else:
-            distance = ''.join([distance, l_f2, "+"])
+            distance = ''.join([distance, l_f, "+"])
 
+    distance = ''.join(["SQRT","(", distance, ")"])
     sql = "select a.id, a.cas, ("+ distance +") as score\n" \
         "from exact_feature as a\n" \
         "order by score asc\n" \
-        "limit 5"
+        "limit 1"
     conn = pymysql.connect(DATABASE_HOST_SAVE, DATABASE_USER_SAVE, DATABASE_PWD_SAVE, DATABASE_SAVE, charset='utf8')
     cur = conn.cursor()
     cur.execute(sql);
@@ -215,9 +217,12 @@ def who_is_it(encoding):
 
 if __name__ == "__main__":
     print("================db.py start ==================")
-    saveData(13203, 86114)
+    saveData(5, 86114)
     #downloadImageStart(70614, n=4793)
 
+    # model = predicte.ModelAndWeight()
+    # encoding = predicte.img_to_encoding_2("image-test/6.png", model)
+    # who_is_it(encoding)
 
     print("")
 
