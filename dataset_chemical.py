@@ -10,7 +10,6 @@ from keras.preprocessing.image import ImageDataGenerator
 
 images = []
 labels = []
-
 IMAGE_SIZE = 160 # 指定图像大小
 # 按指定图像大小调整尺寸
 def resize_image(image, height=IMAGE_SIZE, width=IMAGE_SIZE):
@@ -62,7 +61,7 @@ def read_path(path_name , n=0):
                     labels.append(dir_item[:-4])
     return np.array(images, dtype='float'), np.array(labels)
 
-def load_dataset(n):
+def load_dataset(n=0):
     images,labels = read_path("image-all//", n)
    
    # X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0, random_state=42)
