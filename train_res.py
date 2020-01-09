@@ -74,7 +74,7 @@ if __name__ == "__main__":
     siamese_model.load_weights('saved_models\\resnet50_model_weight.300.h5')
     
     save_dir = os.path.join(os.getcwd(), 'saved_models')
-    model_name = '1_4_resnet50_model_weight.{epoch:03d}.h5'
+    model_name = '1_4_resnet50_model_weight.{epoch:03d}.{loss}.h5'
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
     filepath = os.path.join(save_dir, model_name)
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     checkpoint = ModelCheckpoint(filepath=filepath,
                                 monitor='loss',
                                 verbose=1,
-                                period=10,
+                                period=1,
                                 save_weights_only=True,
                                 save_best_only=True)
                     
