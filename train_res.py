@@ -27,7 +27,7 @@ flags.DEFINE_integer('train_iter', 500, 'Total training iter')
 
 K.set_image_data_format('channels_last')
 def ResNet50_model(input_shape):
-    res_model = keras.applications.ResNet50(include_top=False, input_shape=input_shape, weights=None, pooling='max')
+    res_model = keras.applications.ResNet50(include_top=False, input_shape=input_shape, weights=None, pooling=None) #pooling='max')
    # plot_model(res_model,to_file="Resnet50.png",show_shapes=True)
     return res_model
 
@@ -36,7 +36,7 @@ def contrastive_loss(l, r, y):
     distance = K.sqrt(K.sum(K.pow(l - r, 2), 1, keepdims=True))
     similarity = y * K.square(distance)                                           # keep the similar label (1) close to each other
     dissimilarity = (1 - y) * K.square(K.maximum((margin - distance), 0))        # give penalty to dissimilar label if the distance is bigger than margin
-    return K.mean(dissimilarity + similarity) / 2
+    return K.mean(dissimilarity + similarity)
 
 def next_generator():
     data = ChemicalDataset(FLAGS.train_data_size)
@@ -51,7 +51,13 @@ if __name__ == "__main__":
     left = keras.Input(shape=input_shape, name='left')
     right = keras.Input(shape=input_shape, name='right')
 
-    model = ResNet50_model(input_shape)
+    model_ = ResNet50_model(input_shape)
+    X = keras.Input(shape=input_shape)
+    Y = model_(X)
+    Y = keras.layers.Conv2D(128,(1,1))(Y)
+    Y = keras.layers.GlobalAveragePooling2D()(Y)
+    model = keras.Model(inputs=[X], outputs=[Y])
+
     left_out = model(left)
     right_out = model(right)
 
@@ -63,28 +69,26 @@ if __name__ == "__main__":
     siamese_model = keras.Model(inputs=[left, right, label], outputs=[left_out, right_out, loss])
 
     loss_output= siamese_model.get_layer("loss").output
-    model.add_loss(loss_output)
+    siamese_model.add_loss(loss_output)
     siamese_model.compile(optimizer='Adam', loss=[None,None,None])
 
-    #plot_model(siamese_model, to_file="siamese_model_expand.png", show_shapes=True, expand_nested=True)
-    #plot_model(siamese_model, to_file="siamese_model_expand.png", show_shapes=True)
-
+    print(model.summary())
     print(siamese_model.summary())
 
-    siamese_model.load_weights('saved_models\\resnet50_model_weight.300.h5')
+    #siamese_model.load_weights('saved_models\\1_10_resnet50_model_weight.061.0.0030255448108073325.h5')
     
     save_dir = os.path.join(os.getcwd(), 'saved_models')
-    model_name = '1_4_resnet50_model_weight.{epoch:03d}.{loss}.h5'
+    model_name = '1_10_new_resnet50_model_weight.{epoch:03d}.{loss}.h5'
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
     filepath = os.path.join(save_dir, model_name)
-    #model.load_weights('my_model_weights.h5')
+    model_.load_weights('saved_models\\1.9.resnet50.weight.h5')
     #save best weight 
     checkpoint = ModelCheckpoint(filepath=filepath,
                                 monitor='loss',
                                 verbose=1,
                                 period=1,
-                                save_weights_only=True,
+                                #save_weights_only=True,
                                 save_best_only=True)
                     
     callbacks = [checkpoint]

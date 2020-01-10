@@ -20,8 +20,8 @@ from dataset_chemical import *
 import tool
 import db
 
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+#os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+#os.environ["CUDA_VISIBLE_DEVICES"] = ""
 def img_to_encoding(image_path, model):
     img = cv2.imread(image_path, 0)
     img = img[..., ::-1]
@@ -41,7 +41,7 @@ def img_to_encoding_2(image_path, model):
     return temp2
 
 
-def who_is_it(encoding, database):
+def who_is_it_0(encoding, database):
     margin = 0.5
     # distance = K.sqrt(K.sum(K.pow(l - r, 2), 1, keepdims=True))
     # similarity = y * K.square(distance)
@@ -59,6 +59,10 @@ def who_is_it(encoding, database):
 
     return min_dist, identity
 
+def who_is_it(search_feat, train_feat):
+    dist = cdist(train_feat, search_feat, 'cosine') #cdist 计算两个输入集合的距离
+    rank = np.argsort(dist.ravel())  #np.argsort 将x中的元素从小到大排列，提取其对应的index(索引)
+    print(rank)
 
 def img_to_encoding_from_dir(path_name, model, n=0):
     database = {}
@@ -77,7 +81,7 @@ def img_to_encoding_from_dir(path_name, model, n=0):
                 fileName = dir_item[:-4]
                 database[fileName] = img_to_encoding(full_path, model)
 
-    return database;
+    return database
 
 def ModelAndWeight():
     print(tool.Time() + "ModelAndWeight load begin")
