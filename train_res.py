@@ -94,7 +94,7 @@ if __name__ == "__main__":
                                 monitor='loss',
                                 verbose=1,
                                 period=1,
-                                #save_weights_only=True,
+                                save_weights_only=True,
                                 save_best_only=True)
 
     tbCallBack = keras.callbacks.TensorBoard(log_dir='./graph', 
