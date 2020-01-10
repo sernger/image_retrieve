@@ -99,26 +99,26 @@ def get_canny_only_one(image, image_temp, image_out):
 
 
 #将原始图片重新处理一遍
-def rechange_image(path_name, n=0):
+def rechange_image(dir_source, dir_target, n=0):
     count = 0
-    for dir_item in tqdm(os.listdir(path_name), desc='dirs'):
+    for dir_item in tqdm(os.listdir(dir_source), desc='dirs'):
         count += 1
         if n != 0 and count > n:
             break
         # 从当前工作目录寻找训练集图片的文件夹
-        full_path = os.path.abspath(os.path.join(path_name, dir_item))
+        full_path = os.path.abspath(os.path.join(dir_source, dir_item))
 
         if os.path.isdir(full_path):
             # read_path(full_path, n)
             pass
         else:  # 如果是文件了
             if dir_item.endswith('.png'):
-                get_canny_only_one(full_path, None, "E:/image-all-new/" + dir_item)
+                get_canny_only_one(full_path, None, dir_target + dir_item)
 
     return ""
 
 
 if __name__ == "__main__":
     #get_canny_only_one("e:/image-all/273.png", None, "image-test/273-auto-cut.png")
-    rechange_image( "E:/image-all/")
+    rechange_image( "E:/image-all/", "E:/image-all-new/")
     print("")
