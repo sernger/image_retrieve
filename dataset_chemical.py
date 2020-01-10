@@ -59,16 +59,10 @@ def read_path(path_name , n=0):
                     image = resize_image(image, IMAGE_SIZE, IMAGE_SIZE)
                     images.append(image)
                     labels.append(dir_item[:-4])
-    return np.array(images, dtype='float'), np.array(labels)
+    return np.array(images, dtype='float32'), np.array(labels)
 
 def load_dataset(n=0):
     images,labels = read_path("image-all//", n)
-   
-   # X_train, X_test, y_train, y_test = train_test_split(images, labels, test_size=0, random_state=42)
-  #  X_train, y_train = data_aug_rotate(X_train, y_train)
- #   X_test, y_test = data_aug_rotate(X_test, y_test)
- #   print(X_train.shape) 
- #   return (X_train, y_train), (X_test, y_test)
     return (images, labels), (None, None)
 
 def gasuss_noise(image, mean=0, var=0.001):

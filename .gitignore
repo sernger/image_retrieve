@@ -6,6 +6,7 @@ MNIST_data/*
 .vscode/*
 data/
 img/
+image-all/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
