@@ -2,6 +2,8 @@ import time
 import cv2 as cv
 import numpy as np
 from PIL import Image
+from tqdm import tqdm
+import os
 
 def Time():
     return time.strftime("%Y-%m-%d %H:%M:%S ", time.localtime())
@@ -89,16 +91,34 @@ def get_canny_only_one(image, image_temp, image_out):
     constant = cv.copyMakeBorder(img,15,15,15,15,cv.BORDER_CONSTANT,value=[255,255,255])
 
     # 显示
-    cv.imshow("contours_out", constant)
     if(image_out !=None):
         cv.imwrite(image_out, constant)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    # cv.imshow("contours_out", constant)
+    #cv.waitKey(0)
+    #cv.destroyAllWindows()
 
+
+#将原始图片重新处理一遍
+def rechange_image(path_name, n=0):
+    count = 0
+    for dir_item in tqdm(os.listdir(path_name), desc='dirs'):
+        count += 1
+        if n != 0 and count > n:
+            break
+        # 从当前工作目录寻找训练集图片的文件夹
+        full_path = os.path.abspath(os.path.join(path_name, dir_item))
+
+        if os.path.isdir(full_path):
+            # read_path(full_path, n)
+            pass
+        else:  # 如果是文件了
+            if dir_item.endswith('.png'):
+                get_canny_only_one(full_path, None, "E:/image-all-new/" + dir_item)
+
+    return ""
 
 
 if __name__ == "__main__":
-    #get_canny_only_one("e:/image-all/6.png", None, "image-test/6-auto-cut.png")
-    #get_canny_only_one("e:/image-all/15.png", None, "image-test/15-auto-cut.png")
-    get_canny_only_one("e:/image-all/273.png", None, "image-test/273-auto-cut.png")
+    #get_canny_only_one("e:/image-all/273.png", None, "image-test/273-auto-cut.png")
+    rechange_image( "E:/image-all/")
     print("")
