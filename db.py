@@ -3,6 +3,7 @@ import psycopg2
 import pymysql
 import pymongo
 import predicte
+from img_retrieval_chemical import ModelAndWeight
 import os
 from pathlib import Path
 import tool
@@ -18,7 +19,7 @@ DATABASE_PWD = "cUmY8G3kZ"
 DATABASE_HOST_SAVE= "127.0.0.1"
 DATABASE_PORT_SAVE= "3306"
 DATABASE_SAVE = "molbase_search"
-TABLE_EXACT_SAVE = "exact_feature"
+TABLE_EXACT_SAVE = "exact_feature128"
 DATABASE_USER_SAVE = "root"
 DATABASE_PWD_SAVE = "123456"
 
@@ -30,7 +31,7 @@ DATABASE_USER_READ= "root"
 DATABASE_PWD_READ = "123456"
 
 IMAGE_PATH = "E:/image-all/"
-
+FEATURE_SIZE = 128 #512
 
 """
 :param startId: 化合物ID
@@ -55,7 +56,7 @@ def saveData(startId, endId=0):
     """
     load model and weight
     """
-    model = predicte.ModelAndWeight()
+    model = ModelAndWeight()
 
     pageSize=1000
     while(True):
@@ -76,9 +77,9 @@ def saveData(startId, endId=0):
                 filePath = IMAGE_PATH + str(compound["_id"])+".png"
                 #downloadImage(compound["structImage"], IMAGE_PATH, str(compound["id"])+".png")
                 if Path(filePath).exists():
-                    encoding = predicte.img_to_encoding_2(filePath, model)
+                    encoding = predicte.img_to_encoding(filePath, model)
                     #if(encoding != None):
-                    encodings.append({"compound":compound,"encoding":encoding})
+                    encodings.append({"compound":compound,"encoding":encoding[0]})
 
         encoding_count = len(encodings)
         print(tool.Time() + "saveData getted encoding_count:" + str(encoding_count))
@@ -190,9 +191,6 @@ def who_is_it(encoding):
     for f_index in range(f_count):
         # distance = K.sqrt(K.sum(K.pow(l - r, 2), 1, keepdims=True))
         l_f = ''.join(["POWER(", str(encoding[f_index]), "-", "a.f", str(f_index+1), ",2)"])
-        #l_f2 = '*'.join([l_f, l_f])
-        if(f_index==511):
-            print("")
         if (f_index == f_count - 1):
             distance = ''.join([distance, l_f])
         else:
@@ -220,8 +218,8 @@ if __name__ == "__main__":
     saveData(5, 86114)
     #downloadImageStart(70614, n=4793)
 
-    # model = predicte.ModelAndWeight()
-    # encoding = predicte.img_to_encoding_2("image-test/6.png", model)
+    # model = ModelAndWeight()
+    # encoding = predicte.img_to_encoding_2("image-test/15-web-cut-analysis.png", model)
     # who_is_it(encoding)
 
     print("")

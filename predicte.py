@@ -19,6 +19,7 @@ from train_res import contrastive_loss
 from dataset_chemical import *
 import tool
 import db
+from img_retrieval_chemical import ModelAndWeight
 
 #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
 #os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -29,15 +30,15 @@ def img_to_encoding(image_path, model):
     images_train = np.expand_dims(img, axis=3) / 255.0
     x_train = np.array([images_train])
     embedding = model.predict_on_batch(x_train)
-    return embedding
+    return embedding #shape=(1,128)
 
 
 # 减小特征值数量，每4个取平均值,数量2048->512
 def img_to_encoding_2(image_path, model):
     embedding = img_to_encoding(image_path, model)
     temp1 = embedding.reshape(-1, 4)
-    temp2 = np.mean(temp1, axis=1)
-    # temp3 = np.array([temp2])
+    temp2 = np.mean(temp1, axis=1) # shape=(32,)
+    temp3 = np.array([temp2]) # shape=(1,32)  保持与img_to_encoding返回维度相同
     return temp2
 
 
@@ -82,23 +83,6 @@ def img_to_encoding_from_dir(path_name, model, n=0):
                 database[fileName] = img_to_encoding(full_path, model)
 
     return database
-
-def ModelAndWeight():
-    print(tool.Time() + "ModelAndWeight load begin")
-    input_shape = [160, 160, 1]
-    left = keras.Input(shape=input_shape, name='left')
-    right = keras.Input(shape=input_shape, name='right')
-    model = ResNet50_model(input_shape)
-    #print(tool.Time() + "ModelAndWeight load ResNet50_model end")
-    left_out = model(left)
-    right_out = model(right)
-    label = keras.Input(shape=(1,), name='label')
-    loss = keras.layers.Lambda(lambda x: contrastive_loss(*x), name="loss")([left_out, right_out, label])
-    siamese_model = keras.Model(inputs=[left, right, label], outputs=[left_out, right_out, loss])
-    siamese_model.load_weights("saved_models//1_4_resnet50_model_weight.260.h5")
-    print(tool.Time() + "ModelAndWeight load end")
-    return model
-
 
 
 if __name__ == "__main__":
