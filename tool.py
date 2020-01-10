@@ -98,5 +98,7 @@ def get_canny_only_one(image, image_temp, image_out):
 
 
 if __name__ == "__main__":
-    get_canny_only_one("e:/image-all/273.png", None, "image-test/237-auto-cut.png")
+    #get_canny_only_one("e:/image-all/6.png", None, "image-test/6-auto-cut.png")
+    #get_canny_only_one("e:/image-all/15.png", None, "image-test/15-auto-cut.png")
+    get_canny_only_one("e:/image-all/273.png", None, "image-test/273-auto-cut.png")
     print("")

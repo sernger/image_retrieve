@@ -12,7 +12,7 @@ import tool
 DATABASE_HOST= "192.168.13.213"
 DATABASE_PORT= "5432"
 DATABASE = "compound"
-TABLE_EXACT = "exact_feature"
+TABLE_EXACT = "exact_feature128"
 DATABASE_USER = "mol_hww"
 DATABASE_PWD = "cUmY8G3kZ"
 """
@@ -182,7 +182,7 @@ def downloadImageStart(startId, n=30000):
 
 
 
-def who_is_it(encoding):
+def who_is_it(encoding, name=' '):
     margin = 0.5
     min_dist = 100
     distance = ""
@@ -198,14 +198,14 @@ def who_is_it(encoding):
 
     distance = ''.join(["SQRT","(", distance, ")"])
     sql = "select a.id, a.cas, ("+ distance +") as score\n" \
-        "from exact_feature as a\n" \
+        "from "+ TABLE_EXACT_SAVE +" as a\n" \
         "order by score asc\n" \
         "limit 1"
     conn = pymysql.connect(DATABASE_HOST_SAVE, DATABASE_USER_SAVE, DATABASE_PWD_SAVE, DATABASE_SAVE, charset='utf8')
     cur = conn.cursor()
     cur.execute(sql);
     rows = cur.fetchall()
-    print(rows)
+    print(str(name) + ' => ' + str(rows))
     conn.commit()
     cur.close()
     conn.close()
@@ -219,7 +219,7 @@ if __name__ == "__main__":
     #downloadImageStart(70614, n=4793)
 
     # model = ModelAndWeight()
-    # encoding = predicte.img_to_encoding_2("image-test/15-web-cut-analysis.png", model)
+    # encoding = predicte.img_to_encoding("image-test/15-web-cut-analysis.png", model)
     # who_is_it(encoding)
 
     print("")

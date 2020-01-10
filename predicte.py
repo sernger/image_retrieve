@@ -92,18 +92,32 @@ if __name__ == "__main__":
 
 
     # database = {}
-    # database["6"] = img_to_encoding_2("E:/image-new/6.png", model)
-    # database["7"] = img_to_encoding_2("E:/image-new/7.png", model)
-    # database["11"] = img_to_encoding_2("E:/image-new/11.png", model)
+    # database["6"] = img_to_encoding("E:/image-all/6.png", model)
+    # database["15"] = img_to_encoding("E:/image-all/15.png", model)
+    # database["273"] = img_to_encoding("E:/image-all/273.png", model)
     #
-    # encoding = img_to_encoding_2("image-test/11.png", model)
-    # who_is_it(encoding, database)
-    # encoding = img_to_encoding_2("image-test/11-1.png", model)
-    # who_is_it(encoding, database)
-    # print("")
 
-    encoding = img_to_encoding_2("image-test/11.png", model)
-    db.who_is_it(encoding)
+    encoding = img_to_encoding("image-test/6.png", model)
+    db.who_is_it(encoding[0], '6.png')
+    encoding = img_to_encoding("image-test/15.png", model)
+    db.who_is_it(encoding[0], '15.png')
+    encoding = img_to_encoding("image-test/273.png", model)
+    db.who_is_it(encoding[0], '273.png')
+
+    encoding = img_to_encoding("image-test/6-auto-cut.png", model)
+    #who_is_it_0(encoding, database)
+    db.who_is_it(encoding[0], '6-auto-cut.png')
+    encoding = img_to_encoding("image-test/15-auto-cut.png", model)
+    #who_is_it_0(encoding, database)
+    db.who_is_it(encoding[0], '15-auto-cut.png')
+    encoding = img_to_encoding("image-test/273-auto-cut.png", model)
+    #who_is_it_0(encoding, database)
+    db.who_is_it(encoding[0], '273-auto-cut.png')
+    print("")
+
+
+
+
     print("")
 
 
