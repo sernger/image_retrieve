@@ -18,7 +18,7 @@ from train_res import ResNet50_model
 from train_res import contrastive_loss
 from dataset_chemical import *
 import tool
-import db
+#import db
 from img_retrieval_chemical import ModelAndWeight
 
 #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
@@ -91,28 +91,28 @@ if __name__ == "__main__":
     print("================predicte.py load_weights end ==================")
 
 
-    # database = {}
-    # database["6"] = img_to_encoding("E:/image-all/6.png", model)
-    # database["15"] = img_to_encoding("E:/image-all/15.png", model)
-    # database["273"] = img_to_encoding("E:/image-all/273.png", model)
-    #
+    database = {}
+    database["6"] = img_to_encoding("E:/image-all/6.png", model)
+    database["15"] = img_to_encoding("E:/image-all/15.png", model)
+    database["273"] = img_to_encoding("E:/image-all/273.png", model)
+    
 
     encoding = img_to_encoding("image-test/6.png", model)
-    db.who_is_it(encoding[0], '6.png')
-    encoding = img_to_encoding("image-test/15.png", model)
-    db.who_is_it(encoding[0], '15.png')
-    encoding = img_to_encoding("image-test/273.png", model)
-    db.who_is_it(encoding[0], '273.png')
+    who_is_it_0(encoding[0], '6.png')
+    # encoding = img_to_encoding("image-test/15.png", model)
+    # db.who_is_it(encoding[0], '15.png')
+    # encoding = img_to_encoding("image-test/273.png", model)
+    # db.who_is_it(encoding[0], '273.png')
 
-    encoding = img_to_encoding("image-test/6-auto-cut.png", model)
-    #who_is_it_0(encoding, database)
-    db.who_is_it(encoding[0], '6-auto-cut.png')
-    encoding = img_to_encoding("image-test/15-auto-cut.png", model)
-    #who_is_it_0(encoding, database)
-    db.who_is_it(encoding[0], '15-auto-cut.png')
-    encoding = img_to_encoding("image-test/273-auto-cut.png", model)
-    #who_is_it_0(encoding, database)
-    db.who_is_it(encoding[0], '273-auto-cut.png')
+    # encoding = img_to_encoding("image-test/6-auto-cut.png", model)
+    # #who_is_it_0(encoding, database)
+    # db.who_is_it(encoding[0], '6-auto-cut.png')
+    # encoding = img_to_encoding("image-test/15-auto-cut.png", model)
+    # #who_is_it_0(encoding, database)
+    # db.who_is_it(encoding[0], '15-auto-cut.png')
+    # encoding = img_to_encoding("image-test/273-auto-cut.png", model)
+    # #who_is_it_0(encoding, database)
+    # db.who_is_it(encoding[0], '273-auto-cut.png')
     print("")
 
 

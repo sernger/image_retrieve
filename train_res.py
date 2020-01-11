@@ -18,8 +18,8 @@ from functools import partial
 #os.environ["CUDA_VISIBLE_DEVICES"] = ""
 flags = tf.app.flags
 FLAGS = flags.FLAGS
-flags.DEFINE_integer('batch_size', 32000, 'Batch size.')
-flags.DEFINE_integer('train_data_size', 64, 'train data size.')
+flags.DEFINE_integer('batch_size', 32, 'Batch size.')
+flags.DEFINE_integer('train_data_size', 32000, 'train data size.')
 #flags.DEFINE_integer('val_data_size', 320, 'val data size.')
 flags.DEFINE_integer('train_iter', 500, 'Total training iter')
 #flags.DEFINE_integer('step', 50, 'Save after ... iteration')
@@ -80,10 +80,10 @@ if __name__ == "__main__":
     print(model.summary())
     print(siamese_model.summary())
 
-    model.load_weights('saved_models\\1_10_new_resnet50_model_weight.001.0.06478.h5')
+    model.load_weights('saved_models\\1_resnet50_weight.031.0.00246.h5')
     
     save_dir = os.path.join(os.getcwd(), 'saved_models')
-    model_name = '1_10_new_resnet50_model_weight.{epoch:03d}.{loss:0.5f}.h5'
+    model_name = '2_resnet50_weight.{epoch:03d}.{loss:0.5f}.h5'
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
     filepath = os.path.join(save_dir, model_name)

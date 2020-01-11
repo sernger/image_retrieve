@@ -49,8 +49,8 @@ def get_canny_demo(image, image_temp, image_analysis):
 
 # eg: e:/image-all/273.png
 # 按照轮廓截取图片
-def get_canny_only_one(image, image_temp, image_out):
-    src = cv.imread(image)
+def get_canny_only_one(image, image_temp=None, image_out=None):
+    src = cv.imread(image, 0)
 
     t = 80
     canny_output = canny_demo(src, image_temp)
@@ -64,7 +64,7 @@ def get_canny_only_one(image, image_temp, image_out):
     x_max = 0
     y_max = 0
 
-    contours, hierarchy = cv.findContours(canny_output, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    _, contours, hierarchy = cv.findContours(canny_output, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     for c in range(len(contours)):
         x, y, w, h = cv.boundingRect(contours[c]);
         #cv.rectangle(src, (x, y), (x + w, y + h), (0, 0, 255), 1, 8, 0);
@@ -84,7 +84,7 @@ def get_canny_only_one(image, image_temp, image_out):
             if(y+h > y_max):
                 y_max = y+h
 
-    #cv.rectangle(src, (x_min, y_min), (x_max, y_max), (0, 0, 255), 1, 8, 0);
+    cv.rectangle(src, (x_min, y_min), (x_max, y_max), (0, 0, 255), 1, 8, 0);
     img = src[y_min:y_max, x_min:x_max] # 图像裁剪
 
     # 边界扩充
@@ -93,9 +93,13 @@ def get_canny_only_one(image, image_temp, image_out):
     # 显示
     if(image_out !=None):
         cv.imwrite(image_out, constant)
-    # cv.imshow("contours_out", constant)
-    #cv.waitKey(0)
-    #cv.destroyAllWindows()
+ #   cv.imshow("contours_out", constant)
+  #  cv.waitKey(0)
+  #cv.destroyAllWindows()
+  
+    return constant
+    
+    
 
 
 #将原始图片重新处理一遍
@@ -119,6 +123,6 @@ def rechange_image(dir_source, dir_target, n=0):
 
 
 if __name__ == "__main__":
-    #get_canny_only_one("e:/image-all/273.png", None, "image-test/273-auto-cut.png")
-    rechange_image( "E:/image-all/", "E:/image-all-new/")
+    get_canny_only_one("image-test\\6.png")
+    #rechange_image( "image-all/", "image-all-new/")
     print("")

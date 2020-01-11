@@ -17,7 +17,7 @@ def resize_image(image, height=IMAGE_SIZE, width=IMAGE_SIZE):
     # 获取图片尺寸
     h, w = image.shape
     # 对于长宽不等的图片，找到最长的一边
-    longest_edge = int(max(h, w)*1.3)
+    longest_edge = int(max(h, w)*1.1)
     # 计算短边需要增加多少像素宽度才能与长边等长(相当于padding，长边的padding为0，短边才会有padding)
     if h < longest_edge:
         dh = longest_edge - h
@@ -65,7 +65,7 @@ def load_dataset(n=0):
     images,labels = read_path("image-all//", n)
     return (images, labels), (None, None)
 
-def gasuss_noise(image, mean=0, var=0.001):
+def gasuss_noise(image, mean=0, var=0.0001):
         ''' 
             添加高斯噪声
             mean : 均值 
@@ -102,7 +102,7 @@ datagen = ImageDataGenerator(
         fill_mode='nearest')
 
 def image_random(image):
-    #image = gasuss_noise(image)
+    image = gasuss_noise(image)
     #image = rotate(image)
     gener = datagen.flow(image, batch_size=1)
     return gener.next()
