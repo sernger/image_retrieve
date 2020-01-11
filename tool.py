@@ -84,7 +84,7 @@ def get_canny_only_one(image, image_temp=None, image_out=None):
             if(y+h > y_max):
                 y_max = y+h
 
-    cv.rectangle(src, (x_min, y_min), (x_max, y_max), (0, 0, 255), 1, 8, 0);
+    #cv.rectangle(src, (x_min, y_min), (x_max, y_max), (0, 0, 255), 1, 8, 0);
     img = src[y_min:y_max, x_min:x_max] # 图像裁剪
 
     # 边界扩充

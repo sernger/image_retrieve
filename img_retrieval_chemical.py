@@ -37,9 +37,11 @@ def img_to_encoding(image_path, model):
     img = tool.get_canny_only_one(image_path)
    # img = cv2.imread(image_path, 0)
     #img = img[..., ::-1]
-    cv2.imshow('1', img)
-    cv2.waitKey(0)
+    cv2.imshow('countour', img)
+    cv2.waitKey(10000)
     img = resize_image(img, IMAGE_SIZE, IMAGE_SIZE)
+    cv2.imshow('resize_image', img)
+    cv2.waitKey(10000)
     images_train = np.expand_dims(img, axis=3) / 255.0
     x_train = np.array([images_train])
     embedding = model.predict_on_batch(x_train)
@@ -48,16 +50,16 @@ def img_to_encoding(image_path, model):
 if __name__ == "__main__":
     model = ModelAndWeight()
    
-    
+    '''
     (train_x, train_labels), (_, _)= load_dataset(32000)
     train_x = np.expand_dims(train_x, axis=3) / 255.0
     train_feat = model.predict(train_x)
     np.savez("saved_models\\feat_label", f=train_feat, l=train_labels)
+    '''
     
-    
-    #np_data = np.load("saved_models\\feat_label.npz")
-   # train_feat = np_data['f']
-   # train_labels = np_data['l']
+    np_data = np.load("saved_models\\feat_label.npz")
+    train_feat = np_data['f']
+    train_labels = np_data['l']
     print(train_feat.shape)
 
     search_feat = img_to_encoding("image-test\\49.png" ,model)
