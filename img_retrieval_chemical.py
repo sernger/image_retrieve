@@ -20,10 +20,12 @@ K.set_floatx('float32')
 
 #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
 #os.environ["CUDA_VISIBLE_DEVICES"] = ""
-def retrieval_sim(search_feat, train_feat):
+def retrieval_sim(search_feat, train_feat, n=10):
     dist = cdist(train_feat, search_feat, 'euclidean') #cdist 计算两个输入集合的距离
-    similar = np.squeeze(np.argmin(dist,axis=0)) 
-    return similar
+   #similar = np.squeeze(np.argmin(dist,axis=0)) 
+    similar = np.argsort(dist, axis=0)[:n]
+    dist = np.sort(dist, axis=0)[:n]
+    return similar, dist
 
 def ModelAndWeight():
     print(tool.Time() + "ModelAndWeight load begin")
@@ -37,11 +39,10 @@ def img_to_encoding(image_path, model):
     img = tool.get_canny_only_one(image_path)
    # img = cv2.imread(image_path, 0)
     #img = img[..., ::-1]
-    cv2.imshow('countour', img)
-    cv2.waitKey(10000)
     img = resize_image(img, IMAGE_SIZE, IMAGE_SIZE)
     cv2.imshow('resize_image', img)
     cv2.waitKey(10000)
+    cv2.destroyAllWindows()
     images_train = np.expand_dims(img, axis=3) / 255.0
     x_train = np.array([images_train])
     embedding = model.predict_on_batch(x_train)
@@ -55,17 +56,19 @@ if __name__ == "__main__":
     train_x = np.expand_dims(train_x, axis=3) / 255.0
     train_feat = model.predict(train_x)
     np.savez("saved_models\\feat_label", f=train_feat, l=train_labels)
+    print('save feet')
     '''
-    
     np_data = np.load("saved_models\\feat_label.npz")
     train_feat = np_data['f']
     train_labels = np_data['l']
     print(train_feat.shape)
 
     search_feat = img_to_encoding("image-test\\49.png" ,model)
-    similar = retrieval_sim(search_feat, train_feat)
+    search_feat2 = img_to_encoding("image-test\\8929.png" ,model)
+    search_feat = np.vstack([search_feat, search_feat2])
+    similar, dist = retrieval_sim(search_feat, train_feat)
     print(similar.shape)
 
     #print("acc:{}%".format(np.sum(similar == np.arange(search_feat.shape[0]))/search_feat.shape[0]*100))
-    print(train_labels[similar])
+    print(np.hstack([train_labels[similar], dist]))
     
