@@ -64,7 +64,7 @@ def get_canny_only_one(image, image_temp=None, image_out=None):
     x_max = 0
     y_max = 0
 
-    _, contours, hierarchy = cv.findContours(canny_output, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(canny_output, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     for c in range(len(contours)):
         x, y, w, h = cv.boundingRect(contours[c]);
         #cv.rectangle(src, (x, y), (x + w, y + h), (0, 0, 255), 1, 8, 0);

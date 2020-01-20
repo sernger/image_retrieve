@@ -39,6 +39,7 @@ def img_to_encoding(image_path, model):
     img = tool.get_canny_only_one(image_path)
    # img = cv2.imread(image_path, 0)
     #img = img[..., ::-1]
+    cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
     img = resize_image(img, IMAGE_SIZE, IMAGE_SIZE)
     cv2.imshow('resize_image', img)
     cv2.waitKey(10000)
@@ -63,8 +64,8 @@ if __name__ == "__main__":
     train_labels = np_data['l']
     print(train_feat.shape)
 
-    search_feat = img_to_encoding("image-test\\49.png" ,model)
-    search_feat2 = img_to_encoding("image-test\\8929.png" ,model)
+    search_feat = img_to_encoding("image-test\\21-web-ta.png" ,model)
+    search_feat2 = img_to_encoding("image-test\\21-web.png" ,model)
     search_feat = np.vstack([search_feat, search_feat2])
     similar, dist = retrieval_sim(search_feat, train_feat)
     print(similar.shape)

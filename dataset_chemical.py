@@ -61,6 +61,19 @@ def read_path(path_name , n=0):
                     labels.append(dir_item[:-4])
     return np.array(images, dtype='float32'), np.array(labels)
 
+def read_labels(path_name):
+    labels = []
+    for dir_item in tqdm(os.listdir(path_name), desc='dirs'): 
+        full_path = os.path.abspath(os.path.join(path_name, dir_item))
+        labels.append(dir_item[:-4])
+    return np.array(labels)
+
+def read_imgs(path_name, label):
+    os.path.abspath(os.path.join(path_name, label+'.png'))
+    image = cv2.imread(full_path, 0)  
+    image = resize_image(image, IMAGE_SIZE, IMAGE_SIZE)
+    return np.array(image, dtype='float32')
+
 def load_dataset(n=0):
     images,labels = read_path("image-all//", n)
     return (images, labels), (None, None)
