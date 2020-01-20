@@ -44,8 +44,8 @@ def contrastive_loss(l, r, y):
     dissimilarity = (1 - y) * K.square(K.maximum((margin - distance), 0))        # give penalty to dissimilar label if the distance is bigger than margin
     return K.mean(dissimilarity + similarity)
 
-def next_generator():
-    data = ChemicalDataset(FLAGS.train_data_size)
+def next_generator(dir):
+    data = ChemicalDataset(dir, FLAGS.train_data_size)
     while True:
         yield (data.get_siamese_batch(FLAGS.batch_size), None)
 
@@ -53,70 +53,72 @@ class MyModelCheckPoint(ModelCheckpoint):
     def set_model(self, model):
         self.model = model.get_layer(name='res50')
 
-if __name__ == "__main__":
-
-    input_shape = [160,160,1]
+def train():
+    input_shape = [160, 160, 1]
     print("input_shape:", input_shape)
 
     left = keras.Input(shape=input_shape, name='left')
     right = keras.Input(shape=input_shape, name='right')
 
     model = ResNet50_model(input_shape)
-    
+
     left_out = model(left)
     right_out = model(right)
 
     label = keras.Input(shape=(1,), name='label')
 
-    #custom loss layer
-    loss=keras.layers.Lambda(lambda x:contrastive_loss(*x), name="loss")([left_out, right_out, label])
+    # custom loss layer
+    loss = keras.layers.Lambda(lambda x: contrastive_loss(*x), name="loss")([left_out, right_out, label])
 
     siamese_model = keras.Model(inputs=[left, right, label], outputs=[left_out, right_out, loss])
 
-    loss_output= siamese_model.get_layer("loss").output
+    loss_output = siamese_model.get_layer("loss").output
     siamese_model.add_loss(loss_output)
-    siamese_model.compile(optimizer='Adam', loss=[None,None,None])
+    siamese_model.compile(optimizer='Adam', loss=[None, None, None])
 
     print(model.summary())
     print(siamese_model.summary())
 
-    model.load_weights('saved_models\\1_resnet50_weight.031.0.00246.h5')
-    
+    model.load_weights('saved_models\\2_resnet50_weight.031.0.00246.h5')
+
     save_dir = os.path.join(os.getcwd(), 'saved_models')
     model_name = '2_resnet50_weight.{epoch:03d}.{loss:0.5f}.h5'
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
     filepath = os.path.join(save_dir, model_name)
 
-    
-    #save best weight 
+    # save best weight
     checkpoint = MyModelCheckPoint(filepath=filepath,
-                                monitor='loss',
-                                verbose=1,
-                                period=1,
-                                save_weights_only=True,
-                                save_best_only=True)
+                                   monitor='loss',
+                                   verbose=1,
+                                   period=1,
+                                   save_weights_only=True,
+                                   save_best_only=True)
 
-    tbCallBack = keras.callbacks.TensorBoard(log_dir='./graph', 
-                                             histogram_freq=0, 
-                                             write_graph=True, 
+    tbCallBack = keras.callbacks.TensorBoard(log_dir='./graph',
+                                             histogram_freq=0,
+                                             write_graph=True,
                                              write_images=True)
-    
+
     reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss')
 
     early_stopping = keras.callbacks.EarlyStopping(monitor='loss', patience=20)
 
     callbacks = [checkpoint, tbCallBack, reduce_lr, early_stopping]
 
-    data_gen = next_generator()
+    data_gen = next_generator("image-all//")
 
-    siamese_model.fit_generator(data_gen, 
-                                steps_per_epoch=FLAGS.train_data_size/FLAGS.batch_size, 
-                                epochs=FLAGS.train_iter, 
-                                verbose=1, 
-                                #workers=4, 
-                              #  validation_data = val_data,
-                              # use_multiprocessing=True,
+    siamese_model.fit_generator(data_gen,
+                                steps_per_epoch=FLAGS.train_data_size / FLAGS.batch_size,
+                                epochs=FLAGS.train_iter,
+                                verbose=1,
+                                # workers=4,
+                                #  validation_data = val_data,
+                                # use_multiprocessing=True,
                                 callbacks=callbacks)
+    # model.save(os.path.join(save_dir, "resnet50_model.h5"))
 
-   # model.save(os.path.join(save_dir, "resnet50_model.h5"))
+
+if __name__ == "__main__":
+    train()
+    print("")

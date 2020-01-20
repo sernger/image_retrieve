@@ -69,13 +69,13 @@ def read_labels(path_name):
     return np.array(labels)
 
 def read_imgs(path_name, label):
-    os.path.abspath(os.path.join(path_name, label+'.png'))
+    full_path = os.path.abspath(os.path.join(path_name, label+'.png'))
     image = cv2.imread(full_path, 0)  
     image = resize_image(image, IMAGE_SIZE, IMAGE_SIZE)
     return np.array(image, dtype='float32')
 
-def load_dataset(n=0):
-    images,labels = read_path("image-all//", n)
+def load_dataset(dir, n=0):
+    images,labels = read_path(dir, n)
     return (images, labels), (None, None)
 
 def gasuss_noise(image, mean=0, var=0.0001):

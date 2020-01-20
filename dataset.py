@@ -61,9 +61,9 @@ class MNISTDataset(Dataset):
 		# print("Map label indices:", self.map_train_label_indices)
 
 class ChemicalDataset(Dataset):
-	def __init__(self, n=0):
+	def __init__(self, dir, n=0):
 		print("===Loading Chemical Dataset===")
-		(self.images_train, self.labels_train), (self.images_test, self.labels_test) = load_dataset(n)
+		(self.images_train, self.labels_train), (self.images_test, self.labels_test) = load_dataset(dir, n)
 		self.images_train = np.expand_dims(self.images_train, axis=3) / 255.0
 #		self.images_test = np.expand_dims(self.images_test, axis=3) / 255.0
 		self.labels_train = np.expand_dims(self.labels_train, axis=1)
@@ -79,7 +79,7 @@ class ChemicalDataset(Dataset):
 		#print("Map label indices:", self.map_train_label_indices)
 	
 	class ImageClass():
-        "Stores the paths to images for a given class"
+        #"Stores the paths to images for a given class"
 		def __init__(self, name, image_paths):
 			self.name = name
 			self.image_paths = image_paths
@@ -90,7 +90,7 @@ class ChemicalDataset(Dataset):
 		def __len__(self):
 			return len(self.image_paths)
   
-	def get_dataset(path):
+	def get_dataset(self, path):
 		dataset = []
 		path_exp = os.path.expanduser(path)
 		classes = [path for path in os.listdir(path_exp) \
@@ -100,8 +100,8 @@ class ChemicalDataset(Dataset):
 		for i in range(nrof_classes):
 			class_name = classes[i]
 			facedir = os.path.join(path_exp, class_name)
-			image_paths = get_image_paths(facedir)
-			dataset.append(ImageClass(class_name, image_paths))
+			image_paths = self.get_image_paths(facedir)
+			dataset.append(self.ImageClass(class_name, image_paths))
 	
 		return dataset
 
