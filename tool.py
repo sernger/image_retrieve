@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 import os
+from matplotlib import pyplot as plt
 
 def Time():
     return time.strftime("%Y-%m-%d %H:%M:%S ", time.localtime())
@@ -88,7 +89,8 @@ def get_canny_only_one(image, image_temp=None, image_out=None):
     img = src[y_min:y_max, x_min:x_max] # 图像裁剪
 
     # 边界扩充
-    constant = cv.copyMakeBorder(img,15,15,15,15,cv.BORDER_CONSTANT,value=[255,255,255])
+    border = 15
+    constant = cv.copyMakeBorder(img,border,border,border,border,cv2.BORDER_CONSTANT,value=[255,255,255])
 
     # 显示
     if(image_out !=None):
@@ -117,12 +119,47 @@ def rechange_image(dir_source, dir_target, n=0):
             pass
         else:  # 如果是文件了
             if dir_item.endswith('.png'):
-                get_canny_only_one(full_path, None, dir_target + dir_item)
+                sub_dir = dir_item[0:-4]
+                os.mkdir(dir_target + sub_dir)
+                image_out = dir_target + sub_dir + '\\' + dir_item
+                get_canny_only_one(full_path, None, image_out)
 
     return ""
 
+def threshold(image):
+    img = cv.imread(image, 0)
+    h  = img.shape[0]
+    w = img.shape[1]
+    ret, thresh1 = cv.threshold(img, h, w, cv.THRESH_BINARY)
+    ret, thresh2 = cv.threshold(img, h, w, cv.THRESH_BINARY_INV)
+    ret, thresh3 = cv.threshold(img, h, w, cv.THRESH_TRUNC)
+    ret, thresh4 = cv.threshold(img, h, w, cv.THRESH_TOZERO)
+    ret, thresh5 = cv.threshold(img, h, w, cv.THRESH_TOZERO_INV)
+    titles = ['Original Image', 'BINARY', 'BINARY_INV', 'TRUNC', 'TOZERO', 'TOZERO_INV']
+    images = [img, thresh1, thresh2, thresh3, thresh4, thresh5]
+    for i in range(6):
+        plt.subplot(2, 3, i + 1), plt.imshow(images[i], 'gray')
+        plt.title(titles[i])
+        plt.xticks([]), plt.yticks([])
+    plt.show()
+
+def test_threshold():
+    threshold("image-test\\2\\24-web-ta.png")
+
+    img = get_canny_only_one("image-test\\2\\24-web-ta.png")
+    ret, img = cv.threshold(img, img.shape[0], img.shape[1], cv.THRESH_TOZERO)
+    filename = "image-test\\2\\24-web-ta.txt"
+
+    row = np.array(img).shape[0]  # 获取行数n
+    with open(filename, 'w') as f:  # 若filename不存在会自动创建，写之前会清空文件
+        for i in range(0, row):
+            f.write(str(img[i][0:]))
+            f.write("\n")
+
+    f.close()
+
 
 if __name__ == "__main__":
-    get_canny_only_one("image-test\\6.png")
-    #rechange_image( "image-all/", "image-all-new/")
+    #get_canny_only_one("image-test\\6.png")
+    rechange_image( "E:\\image-all\\", "E:\\image-new\\")
     print("")
