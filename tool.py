@@ -188,5 +188,5 @@ def test_threshold(file_path, save_path):
 
 if __name__ == "__main__":
     #get_canny_only_one("image-test\\6.png")
-    rechange_image( "E:\\image-all\\", "E:\\image-new\\")
+    rechange_image( "E:\\image-new\\7\\", "E:\\test\\train\\")
     print("")
