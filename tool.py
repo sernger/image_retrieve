@@ -90,8 +90,9 @@ def get_canny_only_one(image, image_temp=None, image_out=None):
 
     # 边界扩充
     border = 15
-    constant = cv.copyMakeBorder(img,border,border,border,border,cv2.BORDER_CONSTANT,value=[255,255,255])
+    constant = cv.copyMakeBorder(img,border,border,border,border,cv.BORDER_CONSTANT,value=[255,255,255])
 
+    #constant = resize_image(constant)
     # 显示
     if(image_out !=None):
         cv.imwrite(image_out, constant)
@@ -102,6 +103,32 @@ def get_canny_only_one(image, image_temp=None, image_out=None):
     return constant
     
     
+
+IMAGE_SIZE = 160 # 指定图像大小
+# 按指定图像大小调整尺寸
+def resize_image(image, height=IMAGE_SIZE, width=IMAGE_SIZE):
+    top, bottom, left, right = (0,0,0,0)
+    # 获取图片尺寸
+    h, w = image.shape
+    # 对于长宽不等的图片，找到最长的一边
+    longest_edge = int(max(h, w))
+    # 计算短边需要增加多少像素宽度才能与长边等长(相当于padding，长边的padding为0，短边才会有padding)
+    if h < longest_edge:
+        dh = longest_edge - h
+        top = dh // 2
+        bottom = dh - top
+    elif w < longest_edge:
+        dw = longest_edge - w
+        left = dw // 2
+        right = dw - left
+    else:
+        pass
+
+    # RGB颜色
+    WITHE = [255,255,255]
+    constant = cv.copyMakeBorder(image, top, bottom, left, right, cv.BORDER_CONSTANT, value = WITHE)
+    # 调整图像大小并返回图像，目的是减少计算量和内存占用，提升训练速度
+    return cv.resize(constant, (height, width))
 
 
 #将原始图片重新处理一遍
@@ -143,15 +170,15 @@ def threshold(image):
         plt.xticks([]), plt.yticks([])
     plt.show()
 
-def test_threshold():
-    threshold("image-test\\2\\24-web-ta.png")
+def test_threshold(file_path, save_path):
+    # 只显示
+    threshold(file_path)
 
-    img = get_canny_only_one("image-test\\2\\24-web-ta.png")
+    # 存储
+    img = get_canny_only_one(file_path)
     ret, img = cv.threshold(img, img.shape[0], img.shape[1], cv.THRESH_TOZERO)
-    filename = "image-test\\2\\24-web-ta.txt"
-
     row = np.array(img).shape[0]  # 获取行数n
-    with open(filename, 'w') as f:  # 若filename不存在会自动创建，写之前会清空文件
+    with open(save_path, 'w') as f:  # 若filename不存在会自动创建，写之前会清空文件
         for i in range(0, row):
             f.write(str(img[i][0:]))
             f.write("\n")
