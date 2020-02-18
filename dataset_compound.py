@@ -8,15 +8,17 @@ from tqdm import tqdm
 from keras.preprocessing.image import ImageDataGenerator
 from glob import glob
 from tool import resize_image, IMAGE_SIZE
+from model_compound import ModelAndWeight, retrieval_sim, retrieval_dissim, img_to_encoding, IMAGE_SIZE
 
 
 class ChemicalDataset():
-	def __init__(self, dir, n=0):
+	def __init__(self, model, dir, n=0):
 		print("===Loading Chemical Dataset===")
 		self.labels_train = read_labels_all(dir)
 		self.similarIndex = 0
 		self.dissimilarIndex = 0
 		self.groupSize = 10
+		self.model = model
 
 
 	class ImageClass():
@@ -30,7 +32,7 @@ class ChemicalDataset():
 	
 		def __len__(self):
 			return len(self.image_paths)
-  
+
 	def get_dataset(self, path):
 		dataset = []
 		path_exp = os.path.expanduser(path)
@@ -64,37 +66,54 @@ class ChemicalDataset():
 		r = []
 		result = np.ones(self.groupSize)
 		images = read_imgs(label)
-		images.append(image_randoms(images[0], 2*self.groupSize -len(images), label))
+		if(len(images) < self.groupSize):
+			trans = image_randoms(images[0], self.groupSize - len(images))
+			images.extend(trans)
+
 		for i in range(0, len(images)-1, 2):
 			l.append(images[i])
 			r.append(images[i+1])
 		self.similarIndex += 1
 		return l, r, result
 
-	def _get_siamese_dissimilar_pair(self):
-		#  采样10组不相似pair时，挑选batch中表现最差的10个图片
+	def _get_siamese_dissimilar_pair(self, batchSize):
+		#  采样10组不相似pair时，用现有model挑选batch中表现最差的10个图片
 		label = self.labels_train[self.dissimilarIndex]  # 'e:\image\6'
 		l = []
 		r = []
 		result = np.zeros(self.groupSize)
-		l = read_imgs(label)[0]
+		images = read_imgs(label)
+		if(len(images) < self.groupSize):
+			trans = image_randoms(images[0], self.groupSize - len(images))
+			images.extend(trans)
+
+		l = images
+
+		search_feat = []
+		for i in range(0, len(images)-1, 1):
+			search_feat[i] = img_to_encoding(images[i], self.model) #model = ModelAndWeight()
+
+		train_feat = []
+		batch_label_start = self.dissimilarIndex * batch_size;
+		for i in range(batch_label_start, batch_size, 1):
+			train_feat[i] = img_to_encoding(read_imgs(self.labels_train[i])[0], self.model)
+
+		dissimilar, dist = retrieval_dissim(search_feat, train_feat)
+		r = label[dissimilar]
+
 		self.dissimilarIndex += 1
-
-		# todo
-		r = read_imgs(self.labels_train[self.similarIndex])[0]
-
 		return l, r, result
 	
-	def _get_siamese_pair(self):
+	def _get_siamese_pair(self, batchSize):
 		# if np.random.random() < 0.5:
-			return self._get_siamese_similar_pair()
+		# 	return self._get_siamese_similar_pair()
 		# else:
-		# 	return self._get_siamese_dissimilar_pair()
+			return self._get_siamese_dissimilar_pair(batchSize)
 
 	def get_siamese_batch(self, n):
 		left, right, labels = [], [], []
 		for _ in range(n):
-			l, r, x = self._get_siamese_pair()
+			l, r, x = self._get_siamese_pair(n)
 			left.append(l)
 			right.append(r)
 			labels.append(x)
@@ -167,38 +186,19 @@ datagen = ImageDataGenerator(
 #     gener = datagen.flow(image, batch_size=1)
 #     return gener.next()
 
-def image_randoms(image, similar_size, label_dir):
-	# todo
-	# gener = datagen.flow(image,
-	# batch_size=1,
-	# shuffle=False, # 是否随机打乱，默认True
-	# save_to_dir=r'E:\\test\\train_result',
-	# save_prefix='trans_',
-	# save_format='png')
-	image = np.expand_dims(image, axis=0)
-	if os.path.exists(label_dir):
-		gener = datagen.flow(image, batch_size=1, save_to_dir=label_dir, save_prefix='trans_')
-	else:
-		gener = datagen.flow(image, batch_size=1)
-	images = []
-	for i in range(similar_size):
-		images.append(gener.next())
-
-	return images
+def image_randoms(image, similar_size):
+    image = np.expand_dims(image, axis=0)
+    image = gasuss_noise(image)
+    gener = datagen.flow(image, batch_size=1)
+    images = []
+    for i in range(similar_size):
+        images.append(gener.next())
+    return images
 
 
 if __name__ == "__main__":
-	a = ChemicalDataset("e:\\image-new\\")
-	batch_size = 4
-	ls, rs, xs = a.get_siamese_batch(batch_size)
-	# f, axarr = plt.subplots(batch_size, 2, figsize=(10, 10))
-	# for idx, (l, r, x) in enumerate(zip(ls, rs, xs)):
-	# 	print("Row", idx, "Label:", "similar" if x else "dissimilar")
-	# 	print("max:", np.squeeze(l).max())
-	# 	axarr[idx, 0].imshow(np.squeeze(l),cmap='gray', vmin=0, vmax=1.0)
-	# 	axarr[idx, 1].imshow(np.squeeze(r),cmap='gray', vmin=0, vmax=1.0)
-	# plt.show()
-
-	#i = read_imgs("E:\\image-new\\6")
-
-	print("")
+    model  = ModelAndWeight()
+    dataset = ChemicalDataset(model, "d:\\prj\\image-new\\")
+    batch_size = 16
+    ls, rs, xs = dataset.get_siamese_batch(batch_size)
+    print("")

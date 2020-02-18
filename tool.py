@@ -1,3 +1,4 @@
+
 import time
 import cv2 as cv
 import numpy as np
@@ -131,7 +132,7 @@ def resize_image(image, height=IMAGE_SIZE, width=IMAGE_SIZE):
     return cv.resize(constant, (height, width))
 
 
-#将原始图片重新处理一遍
+#将原始图片重新处理一遍:四周增加等宽空白，每个图片增加一层文件夹
 def rechange_image(dir_source, dir_target, n=0):
     count = 0
     for dir_item in tqdm(os.listdir(dir_source), desc='dirs'):
@@ -170,7 +171,8 @@ def threshold(image):
         plt.xticks([]), plt.yticks([])
     plt.show()
 
-def test_threshold(file_path, save_path):
+#测试
+def use_threshold(file_path, save_path):
     # 只显示
     threshold(file_path)
 
@@ -187,6 +189,5 @@ def test_threshold(file_path, save_path):
 
 
 if __name__ == "__main__":
-    #get_canny_only_one("image-test\\6.png")
-    rechange_image( "E:\\image-new\\7\\", "E:\\test\\train\\")
+    rechange_image( "d:\\prj\\image-all\\", "d:\\prj\\image-new\\")
     print("")
