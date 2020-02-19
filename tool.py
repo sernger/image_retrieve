@@ -160,10 +160,12 @@ def rechange_image(dir_source, dir_target, n=0):
 def rotate_resize(image_file, save_path, center=None, scale=1.0):
     angle = 5 # 幅度：0~100
     zoom = 0.1 # 幅度： 0.1~0.15
+    image = cv2.imread(image_file, 0)
+    image = resize_image(image)
     for i in range(1, 10):
         angle = angle + random.randint(0,100)
         #zoom = zoom + random.randint(0,5)/float(100)
-        image = cv2.imread(image_file, 1)
+
         #缩放
         #image = ndimage.zoom(image, zoom, reshape=False, cval=255)
         rotated = ndimage.rotate(image, angle, reshape=False, cval=255)
