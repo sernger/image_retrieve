@@ -2,12 +2,13 @@
 import time
 import cv2 as cv
 import numpy as np
-from PIL import Image
 from tqdm import tqdm
 import os
 from matplotlib import pyplot as plt
-from glob import glob
+import random
+
 import cv2
+from scipy import misc, ndimage
 
 def Time():
     return time.strftime("%Y-%m-%d %H:%M:%S ", time.localtime())
@@ -99,10 +100,7 @@ def get_canny_only_one(image, image_temp=None, image_out=None):
     # 显示
     if(image_out !=None):
         cv.imwrite(image_out, constant)
- #   cv.imshow("contours_out", constant)
-  #  cv.waitKey(0)
-  #cv.destroyAllWindows()
-  
+
     return constant
     
     
@@ -154,7 +152,27 @@ def rechange_image(dir_source, dir_target, n=0):
                 image_out = dir_target + sub_dir + '\\' + dir_item
                 get_canny_only_one(full_path, None, image_out)
 
+                rotate_resize(image_out,  dir_target + sub_dir + "\\")
+
     return ""
+
+
+def rotate_resize(image_file, save_path, center=None, scale=1.0):
+    angle = 5 # 幅度：0~100
+    zoom = 0.1 # 幅度： 0.1~0.15
+    for i in range(1, 10):
+        angle = angle + random.randint(0,100)
+        #zoom = zoom + random.randint(0,5)/float(100)
+        image = cv2.imread(image_file, 1)
+        #缩放
+        #image = ndimage.zoom(image, zoom, reshape=False, cval=255)
+        rotated = ndimage.rotate(image, angle, reshape=False, cval=255)
+
+        # 返回旋转后的图像
+        filename = save_path +  "tran_" + str(i) + '.png'
+        cv2.imwrite(filename, rotated)
+    return ""
+
 
 def threshold(image):
     img = cv.imread(image, 0)
@@ -190,45 +208,9 @@ def use_threshold(file_path, save_path):
     f.close()
 
 
-# 获取所有文件目录，并排序
-# 返回绝对路径：'e:\\image-new\\6'
-# load_data("e:\\image-new\\")
-# return dataset[class][image_paths]
-def load_data(path_name):
-    dataset = []
-    labels = glob(path_name + "*")
-    labels.sort(key=lambda x: int(x[len(path_name):]))
-    for label in labels:
-        files = glob(label + "\\*")
-        dataset.append(files)
-    return dataset
-
-# loadimgs(image_paths)
-def loadimgs(image_paths):
-    imgs = []
-    for file in image_paths:
-        image = cv2.imread(file, 0)  # 灰度图片shape=(160,160)
-        image = resize_image(image, IMAGE_SIZE, IMAGE_SIZE)
-        image = np.expand_dims(image, axis=3) / 255.0  # liwei add
-        imgs.append(np.array(image, dtype='float32'))
-    return imgs
-
-# 获取某个子文件下（'e:\\image-new\\6'）所有文件,并归一化
-def loadimgs2(file_dir):
-	imgs = []
-	files = glob(file_dir + "\\*")
-	for file in files:
-		image = cv2.imread(file, 0) # 灰度图片shape=(160,160)
-		image = resize_image(image, IMAGE_SIZE, IMAGE_SIZE)
-		image = np.expand_dims(image, axis=3) / 255.0  # liwei add
-		imgs.append(np.array(image, dtype='float32'))
-	return imgs
-
-
-
 if __name__ == "__main__":
-    #rechange_image( "d:\\prj\\image-all\\", "d:\\prj\\image-new\\")
-    #load_data("d:\\prj\\image-new\\")
-    ##if os.path.isdir(facedir):
-    aa= load_data("d:\\prj\\image-new\\")
+    rechange_image( "d:\\prj\\image-all\\", "d:\\prj\\image-new2\\")
+
+    #aa= load_data("d:\\prj\\image-new\\")
+    #rotate_resize("d:\\prj\\image-new\\1\\1.png", "d:\\prj\\image-new\\1\\")
     print("")
